@@ -167,6 +167,10 @@ a.secondary {
     }
 }
 
+.table_container {
+    padding: 50px;
+}
+
 .table_header {
     background-color: #273142;
     padding: 22px;
@@ -193,8 +197,13 @@ a.secondary {
     font-size: 20px;
 
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 15px;
     /* Ensures no gaps between cells */
+}
+
+.normal_row td {
+    background-color: #313d4f;
 }
 
 .projects_table td,
