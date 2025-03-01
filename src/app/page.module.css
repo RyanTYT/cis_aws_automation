@@ -199,6 +199,7 @@ a.secondary {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 15px;
+    table-layout: fixed;
     /* Ensures no gaps between cells */
 }
 

@@ -5,7 +5,7 @@ export async function GET(req) {
     const sections = db
       .prepare(
         `
-            SELECT sections.id, sections.name, logs.last_run, logs.tests_passed, logs.tests_failed, logs.tests_skipped
+            SELECT sections.id, sections.name, sections.audit, sections.remediation, logs.last_run, logs.tests_passed, logs.tests_failed, logs.tests_skipped
             FROM logs
             LEFT JOIN sections
             ON logs.id = sections.id
