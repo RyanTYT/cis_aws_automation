@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { PieChart, Pie, Tooltip, Cell } from "recharts";
 import Expander from "@/app/Expander";
+import LoginForm from "./login";
+import LogoutButton from "@/components/LogoutButton";
 
 // ensure key is reversed
 function build_nested_json(test_dict, key, val) {
@@ -23,6 +25,8 @@ function build_nested_json(test_dict, key, val) {
 export default function Home() {
   const [logs, setLogsRaw] = useState([]);
   const [tests, setTests] = useState(<></>);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [accessKeyId, setAccessKeyId] = useState(null);
   const setLogs = (logs) => {
     setLogsRaw(logs);
     setTests(
@@ -32,7 +36,7 @@ export default function Home() {
     );
   };
 
-  useEffect(() => {
+  const fetchLogs = () => {
     fetch("/api").then(async (res) => {
       const log_dict = {};
       (await res.json()).forEach((log) =>
@@ -40,12 +44,40 @@ export default function Home() {
       );
       setLogs(log_dict);
     });
+  };
+
+  useEffect(() => {
+    fetch("/api/check-auth", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          setAccessKeyId(data.accessKeyId);
+          fetchLogs(); // Load logs only if authenticated
+        } else {
+          setIsAuthenticated(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Auth check error:", error);
+        setIsAuthenticated(false);
+      });
   }, []);
 
   const num_of_tests = 100;
 
+  if (isAuthenticated === null) {
+    return <p className="text-center text-gray-500">Checking authentication...</p>;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
+
   return (
+
     <div className={styles.table_container}>
+    <LogoutButton />
       <div className={styles.table_header}>
         <header>
           <div className={styles.table_header_primary}>Tests</div>
@@ -54,6 +86,10 @@ export default function Home() {
           </div>
         </header>
       </div>
+
+      <div className={styles.projects_table}>
+            <strong>AWS Access Key ID:</strong> {accessKeyId}
+          </div>
 
       <table className={styles.projects_table}>
         <thead>
