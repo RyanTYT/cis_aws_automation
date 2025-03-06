@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import "./aws-assets.css"; 
 
 export default function AWSAssetsPage() {
   const [assets, setAssets] = useState(null);
