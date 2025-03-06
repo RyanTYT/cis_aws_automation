@@ -47,12 +47,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetch("/api/check-auth", { credentials: "include" })
+    fetch("http://localhost:8099/get-aws-credentials/")
       .then((res) => res.json())
       .then((data) => {
-        if (data.authenticated) {
+        if (data.access_key_id) {
           setIsAuthenticated(true);
-          setAccessKeyId(data.accessKeyId);
+          setAccessKeyId(data.access_key_id);
           fetchLogs(); // Load logs only if authenticated
         } else {
           setIsAuthenticated(false);

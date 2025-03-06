@@ -6,10 +6,19 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/logout", { method: "POST", credentials: "include" });
+      const res = await fetch("http://localhost:8099/store-aws-credentials/", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key_id: "",
+          secret_access_key: "",
+          default_region: "",
+        }),
+      });
 
       if (res.ok) {
-        router.replace("/?page=login"); // 👈 Redirect to login page after logout
+        router.replace("/?page=login");
+        window.location.reload()
       } else {
         console.error("Logout failed");
       }
