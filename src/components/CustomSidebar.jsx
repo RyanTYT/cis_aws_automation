@@ -37,7 +37,7 @@ export default function CustomSidebar({ accessKeyId }) {
           button: ({ level, active, disabled }) => {
             // only apply styles on first level elements of the tree
             return {
-              color: "#738297",
+              color: "var(--foreground)",
               backgroundColor: active ? "#313d4f" : "#273142",
             };
           },

@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { PulseLoader } from "react-spinners";
-import "./LoginForm.css";
+import styles from "./LoginForm.module.css";
+import TextField from "@mui/material/TextField";
+import { Button } from "@mui/material";
 
 export default function LoginForm() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -77,37 +79,44 @@ export default function LoginForm() {
     </>
   ) : (
     <>
-      <div className="login-container">
+      <div className={styles.login_container}>
         <img
           src="/logo.png"
           alt="Vantage Point Security Logo"
-          className="logo"
+          className={styles.logo}
         />
-        <div className="login-box">
-          <h2 className="login-title">Enter AWS Credentials</h2>
-          <form onSubmit={handleLogin} className="login-form">
-            <input
-              type="text"
-              placeholder="Access Key ID"
-              value={accessKeyId}
+        <div className={styles.login_box}>
+          <h2 className={styles.login_title}>Enter AWS Credentials</h2>
+          <form onSubmit={handleLogin} className={styles.login_form}>
+            <TextField
+              id="standard-helperText"
+              label="Access Key ID"
+              defaultValue=""
+              // helperText="Access Key ID"
+              InputLabelProps={{ sx: { color: "var(--foreground)" } }}
               onChange={(e) => setAccessKeyId(e.target.value)}
-              required
+              variant="standard"
             />
-            <input
-              type="password"
-              placeholder="Secret Access Key"
-              value={secretAccessKey}
+            <TextField
+              id="standard-helperText"
+              label="Secret Access Key"
+              defaultValue=""
               onChange={(e) => setSecretAccessKey(e.target.value)}
-              required
+              InputLabelProps={{ sx: { color: "var(--foreground)" } }}
+              type="password"
+              variant="standard"
             />
-            <input
-              type="text"
-              placeholder="Region"
-              value={region}
+            <TextField
+              id="standard-helperText"
+              label="Region"
+              defaultValue=""
               onChange={(e) => setRegion(e.target.value)}
-              required
+              InputLabelProps={{ sx: { color: "var(--foreground)" } }}
+              variant="standard"
             />
-            <button type="submit">Login</button>
+            <Button variant="text" type="submit">
+              Login
+            </Button>
           </form>
         </div>
       </div>
