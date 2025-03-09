@@ -1,6 +1,6 @@
-
 .normal_row {
     width: 100%;
+    cursor: pointer;
 }
 .normal_row td {
     background-color: #313d4f;

@@ -1,107 +1,116 @@
 "use client";
 import { useEffect, useState } from "react";
-import styles from "./page.module.css";
-import { PieChart, Pie, Tooltip, Cell } from "recharts";
-import Expander from "@/app/Expander";
-import LoginForm from "./login";
-import LogoutButton from "@/components/LogoutButton";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { PulseLoader } from "react-spinners";
+import "./LoginForm.css";
 
-// ensure key is reversed
-function build_nested_json(test_dict, key, val) {
-  if (key.length == 0) {
-    for (const [inner_key, inner_val] of Object.entries(val)) {
-      test_dict[inner_key] = inner_val;
-    }
-    return;
-  }
-
-  const next_key = key.pop();
-  if (!(next_key in test_dict)) {
-    test_dict[next_key] = {};
-  }
-  build_nested_json(test_dict[next_key], key, val);
-}
-
-export default function Home() {
-  const [logs, setLogsRaw] = useState([]);
-  const [tests, setTests] = useState(<></>);
+export default function LoginForm() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const [accessKeyId, setAccessKeyId] = useState(null);
-  const setLogs = (logs) => {
-    setLogsRaw(logs);
-    setTests(
-      Object.keys(logs).map((key) => (
-        <Expander key={key} tests={logs[key]} depth={0} />
-      )),
-    );
-  };
-
-  const fetchLogs = () => {
-    fetch("/api").then(async (res) => {
-      const log_dict = {};
-      (await res.json()).forEach((log) =>
-        build_nested_json(log_dict, log.id.split(".").reverse(), log),
-      );
-      setLogs(log_dict);
-    });
-  };
 
   useEffect(() => {
     fetch("http://localhost:8099/get-aws-credentials/")
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((data) => {
         if (data.access_key_id) {
           setIsAuthenticated(true);
           setAccessKeyId(data.access_key_id);
-          fetchLogs(); // Load logs only if authenticated
         } else {
           setIsAuthenticated(false);
         }
       })
       .catch((error) => {
-        console.error("Auth check error:", error);
+        toast.error(`Auth check error: ${error}`);
         setIsAuthenticated(false);
       });
   }, []);
 
-  const num_of_tests = 100;
+  const [accessKeyId, setAccessKeyId] = useState("");
+  const [secretAccessKey, setSecretAccessKey] = useState("");
+  const [region, setRegion] = useState("");
 
-  if (isAuthenticated === null) {
-    return <p className="text-center text-gray-500">Checking authentication...</p>;
-  }
+  const router = useRouter();
 
-  if (!isAuthenticated) {
-    return <LoginForm />;
-  }
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  return (
+    try {
+      const res = await fetch("http://localhost:8099/store-aws-credentials/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key_id: accessKeyId,
+          secret_access_key: secretAccessKey,
+          default_region: region,
+        }),
+      });
 
-    <div className={styles.table_container}>
-    <LogoutButton />
-      <div className={styles.table_header}>
-        <header>
-          <div className={styles.table_header_primary}>Tests</div>
-          <div className={styles.table_header_count}>
-            | {num_of_tests} tests
-          </div>
-        </header>
+      if (res.ok) {
+        // console.log("Login successful");
+        // router.replace("/");
+        // window.location.reload();
+        sessionStorage.setItem("accessKeyId", accessKeyId);
+        sessionStorage.setItem("secretAccessKey", secretAccessKey);
+        sessionStorage.setItem("region", region);
+        router.push("/dashboard");
+      } else {
+        const data = await res.json();
+        toast.error(data.detail || "Login failed");
+      }
+    } catch (err) {
+      toast.error(`Login error: ${err}`);
+    }
+  };
+
+  return isAuthenticated === null ? (
+    <>
+      <p className="text-center text-gray-500">Checking authentication...</p>
+      <PulseLoader
+        color="#1e1e2f"
+        loading={isAuthenticated}
+        size={150}
+        aria-label="Checking Authentication..."
+      />
+    </>
+  ) : (
+    <>
+      <div className="login-container">
+        <img
+          src="/logo.png"
+          alt="Vantage Point Security Logo"
+          className="logo"
+        />
+        <div className="login-box">
+          <h2 className="login-title">Enter AWS Credentials</h2>
+          <form onSubmit={handleLogin} className="login-form">
+            <input
+              type="text"
+              placeholder="Access Key ID"
+              value={accessKeyId}
+              onChange={(e) => setAccessKeyId(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Secret Access Key"
+              value={secretAccessKey}
+              onChange={(e) => setSecretAccessKey(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Region"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              required
+            />
+            <button type="submit">Login</button>
+          </form>
+        </div>
       </div>
-
-      <div className={styles.projects_table}>
-            <strong>AWS Access Key ID:</strong> {accessKeyId}
-          </div>
-
-      <table className={styles.projects_table}>
-        <thead>
-          <tr>
-            <th>Benchmark Test</th>
-            <th>Last Test Ran</th>
-            <th>Status</th>
-            <th className="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>{tests}</tbody>
-      </table>
-    </div>
+    </>
   );
 }
