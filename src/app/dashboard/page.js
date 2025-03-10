@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import Expander from "@/components/Expander";
-import LogoutButton from "@/components/LogoutButton";
 import CustomSidebar from "@/components/CustomSidebar";
+import { Button } from "@mui/material";
 
 // ensure key is reversed
 function build_nested_json(test_dict, key, val) {
@@ -57,6 +57,9 @@ export default function Home() {
             <div className={styles.table_header_count}>
               | {num_of_tests} tests
             </div>
+          </header>
+          <header>
+            <Button variant="outlined">Run</Button>
           </header>
         </div>
 

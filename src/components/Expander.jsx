@@ -96,14 +96,45 @@ export default function Expander({ tests, depth, initial_display = true }) {
     </tr>
   );
   if (tests.audit) {
+    const Audit = (
+      <>
+        {tests.audit
+          .split("\n")
+          .filter((line) => !/^[0-9]+\sPage/.test(line))
+          .map((line, ind) => (
+            <>
+              <span key={ind} style={{ color: `${ind > 2 ? "red" : "green"}` }}>
+                {line}
+              </span>
+              <br />
+            </>
+          ))}
+      </>
+    );
+    const Remediation = (
+      <>
+        {tests.remediation
+          .split("\n")
+          .filter((line) => !/^Page\s[0-9]+$/.test(line.trim()))
+          .map((line, ind) => (
+            <>
+              <span key={ind} style={{ color: `${ind > 2 ? "red" : "green"}` }}>
+                {line}
+              </span>
+              <br />
+            </>
+          ))}
+      </>
+    );
     row = (
       <>
         {row}
         <tr style={{ display: isExpanded ? "" : "none" }}>
           <td
             colSpan={2}
+            valign="top"
             style={{
-              paddingLeft: `${50 * depth}px`,
+              paddingLeft: `${50 * depth + 20}px`,
               backgroundColor: "#313d4f",
               backgroundClip: "padding-box",
               borderRadius: "20px",
@@ -111,11 +142,25 @@ export default function Expander({ tests, depth, initial_display = true }) {
               borderBottomRightRadius: "0",
 
               boxShadow: `inset ${50 * depth}px 0 0 0 #273142`,
+              whiteSpace: "pre-wrap",
             }}
           >
-            {tests.audit}
+            {`Audit Steps:\n\n`}
+            {Audit}
           </td>
-          <td colSpan={2}>{tests.remediation}</td>
+          <td
+            valign="top"
+            colSpan={2}
+            style={{
+              backgroundColor: "#313d4f",
+              borderTopRightRadius: "20px",
+              borderBottomRightRadius: "20px",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {`Remediation Steps:\n\n`}
+            {Remediation}
+          </td>
         </tr>
       </>
     );

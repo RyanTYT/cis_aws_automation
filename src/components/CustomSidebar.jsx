@@ -35,10 +35,13 @@ export default function CustomSidebar({ accessKeyId }) {
       <Menu
         menuItemStyles={{
           button: ({ level, active, disabled }) => {
-            // only apply styles on first level elements of the tree
             return {
-              color: "var(--foreground)",
-              backgroundColor: active ? "#313d4f" : "#273142",
+              "&:hover": {
+                color: "#273142",
+                backgroundColor: "var(--foreground)",
+              },
+              color: active ? "#273142" : "var(--foreground)",
+              backgroundColor: active ? "var(--foreground)" : "#273142",
             };
           },
         }}
@@ -51,7 +54,9 @@ export default function CustomSidebar({ accessKeyId }) {
               Access Key ID: {accessKeyId}{" "}
             </p>
           </MenuItem>
-          <MenuItem> Remedies </MenuItem>
+          {
+            // <MenuItem> Remedies </MenuItem>
+          }
         </SubMenu>
         <MenuItem onClick={handleLogout}> Logout </MenuItem>
       </Menu>
