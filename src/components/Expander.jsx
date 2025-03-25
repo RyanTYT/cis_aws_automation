@@ -24,108 +24,150 @@ export default function Expander({ tests, depth, initial_display = true }) {
     }
     return null;
   };
-  let row = (
-    <tr
-      className={styles.normal_row}
-      style={{ display: initial_display ? "" : "none" }}
-      key={tests.name}
-      onClick={() => setIsExpanded(!isExpanded)}
-    >
-      <td
-        style={{
-          paddingLeft: `${50 * depth}px`,
-          backgroundColor: "#313d4f",
-          backgroundClip: "padding-box",
-          borderRadius: "20px",
-          borderTopRightRadius: "0",
-          borderBottomRightRadius: "0",
 
-          boxShadow: `inset ${50 * depth}px 0 0 0 #273142`,
-        }}
+  let row = <></>;
+
+  if (Object.keys(tests).includes("benchmark-0")) {
+    const test_statuses = Object.keys(tests)
+      .filter((key) => key.includes("benchmark"))
+      .map((test) => tests[test].result.status);
+    console.log(test_statuses);
+    row = (
+      <tr
+        className={styles.normal_row}
+        style={{ display: initial_display ? "" : "none" }}
+        key={tests.title}
+        onClick={() => setIsExpanded(!isExpanded)}
       >
-        <p style={{ paddingLeft: "20px" }}>{tests.name}</p>
-      </td>
-      <td>
-        <p>{tests.last_run.substr(0, 10)}</p>
-      </td>
-      <td>
-        <PieChart width={100} height={100}>
-          <Pie
-            data={[
-              {
-                name: "Tests Passed",
-                value: tests.tests_passed.length,
-                color: "#4AD673",
-              }, // Green
-              {
-                name: "Tests Failed",
-                value: tests.tests_failed.length,
-                color: "#D65B4A",
-              }, // Red
-              {
-                name: "Tests Skipped",
-                value: tests.tests_skipped.length,
-                color: "#B0B0B0",
-              }, // Grey
-            ]}
-            dataKey="value"
-            stroke="none"
-            cx="50%"
-            cy="50%"
-            innerRadius={40} // Makes it a donut
-            outerRadius={50}
-            startAngle={90} // Starts from the top
-            endAngle={-270} // Full circle
-            paddingAngle={10}
-          >
-            <Cell fill="#4AD673" />
-            <Cell fill="#D65B4A" />
-            <Cell fill="#B0B0B0" />
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-        </PieChart>
-      </td>
-      <td
-        style={{
-          borderTopRightRadius: "20px",
-          borderBottomRightRadius: "20px",
-        }}
+        <td
+          style={{
+            paddingLeft: `${50 * depth}px`,
+            backgroundColor: "#313d4f",
+            backgroundClip: "padding-box",
+            borderRadius: "20px",
+            borderTopRightRadius: "0",
+            borderBottomRightRadius: "0",
+
+            boxShadow: `inset ${50 * depth}px 0 0 0 #273142`,
+          }}
+        >
+          <p style={{ paddingLeft: "20px" }}>{tests.title}</p>
+        </td>
+        {
+          // <td>
+          // {
+          //<p>{tests.last_run.substr(0, 10)}</p>
+          // }
+          // </td>
+        }
+        <td>
+          <PieChart width={100} height={100}>
+            <Pie
+              data={[
+                {
+                  name: "Tests Passed",
+                  value: test_statuses.filter(
+                    (test_status) => test_status === "success",
+                  ).length,
+                  color: "#4AD673",
+                }, // Green
+                {
+                  name: "Tests Failed",
+                  value: test_statuses.filter(
+                    (test_status) => test_status === "fail",
+                  ).length,
+                  color: "#D65B4A",
+                }, // Red
+                {
+                  name: "Tests Skipped",
+                  value: test_statuses.filter(
+                    (test_status) => test_status === "manual",
+                  ).length,
+                  color: "#B0B0B0",
+                }, // Grey
+              ]}
+              dataKey="value"
+              stroke="none"
+              cx="50%"
+              cy="50%"
+              innerRadius={40} // Makes it a donut
+              outerRadius={50}
+              startAngle={90} // Starts from the top
+              endAngle={-270} // Full circle
+              paddingAngle={10}
+            >
+              <Cell fill="#4AD673" />
+              <Cell fill="#D65B4A" />
+              <Cell fill="#B0B0B0" />
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </td>
+        <td
+          style={{
+            borderTopRightRadius: "20px",
+            borderBottomRightRadius: "20px",
+          }}
+        >
+          Actions
+        </td>
+      </tr>
+    );
+  } else {
+    row = (
+      <tr
+        className={styles.normal_row}
+        style={{ display: initial_display ? "" : "none" }}
+        key={tests.title}
+        onClick={() => setIsExpanded(!isExpanded)}
       >
-        Actions
-      </td>
-    </tr>
-  );
-  if (tests.audit) {
-    const Audit = (
-      <>
-        {tests.audit
-          .split("\n")
-          .filter((line) => !/^[0-9]+\sPage/.test(line))
-          .map((line, ind) => (
-            <>
-              <span key={ind} style={{ color: `${ind > 2 ? "red" : "green"}` }}>
-                {line}
-              </span>
-              <br />
-            </>
-          ))}
-      </>
+        <td
+          style={{
+            paddingLeft: `${50 * depth}px`,
+            backgroundColor: "#313d4f",
+            backgroundClip: "padding-box",
+            borderRadius: "20px",
+            borderTopRightRadius: "0",
+            borderBottomRightRadius: "0",
+
+            boxShadow: `inset ${50 * depth}px 0 0 0 #273142`,
+          }}
+        >
+          <p style={{ paddingLeft: "20px" }}>{tests.title}</p>
+        </td>
+        <td></td>
+        {
+          // <td>
+          // {
+          //<p>{tests.last_run.substr(0, 10)}</p>
+          // }
+          // </td>
+        }
+        <td
+          style={{
+            borderTopRightRadius: "20px",
+            borderBottomRightRadius: "20px",
+          }}
+        >
+          Actions
+        </td>
+      </tr>
     );
-    const Remediation = (
-      <>
-        {tests.remediation
-          .split("\n")
-          .filter((line) => !/^Page\s[0-9]+$/.test(line.trim()))
-          .map((line, ind) => (
-            <>
-              <span key={ind} style={{ color: `${ind > 2 ? "red" : "green"}` }}>
-                {line}
-              </span>
-              <br />
-            </>
-          ))}
-      </>
-    );
+    // const Result = (
+    //   <>
+    //     {tests.audit
+    //       .split("\n")
+    //       .filter((line) => !/^[0-9]+\sPage/.test(line))
+    //       .map((line, ind) => (
+    //         <>
+    //           <span key={ind} style={{ color: `${ind > 2 ? "red" : "green"}` }}>
+    //             {line}
+    //           </span>
+    //           <br />
+    //         </>
+    //       ))}
+    //   </>
+    // );
     row = (
       <>
         {row}
@@ -146,11 +188,11 @@ export default function Expander({ tests, depth, initial_display = true }) {
             }}
           >
             {`Audit Steps:\n\n`}
-            {Audit}
+            {tests.text}
           </td>
           <td
             valign="top"
-            colSpan={2}
+            colSpan={1}
             style={{
               backgroundColor: "#313d4f",
               borderTopRightRadius: "20px",
@@ -158,8 +200,9 @@ export default function Expander({ tests, depth, initial_display = true }) {
               whiteSpace: "pre-wrap",
             }}
           >
-            {`Remediation Steps:\n\n`}
-            {Remediation}
+            {`Errors:\n\n`}
+            {tests.result.status}
+            {tests.result.error}
           </td>
         </tr>
       </>
@@ -170,14 +213,18 @@ export default function Expander({ tests, depth, initial_display = true }) {
     .filter(
       (key) =>
         ![
-          "id",
-          "name",
-          "audit",
-          "remediation",
-          "last_run",
-          "tests_passed",
-          "tests_failed",
-          "tests_skipped",
+          // "id",
+          // "name",
+          // "audit",
+          // "remediation",
+          // "last_run",
+          // "tests_passed",
+          // "tests_failed",
+          // "tests_skipped",
+          "result",
+          "script",
+          "text",
+          "title",
         ].includes(key),
     )
     .map((key) => {

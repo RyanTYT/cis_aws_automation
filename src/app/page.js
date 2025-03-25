@@ -8,22 +8,24 @@ import TextField from "@mui/material/TextField";
 import { Button } from "@mui/material";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
+  const BASE_URL = process.env.BASE_URL;
   useEffect(() => {
-    fetch("http://localhost:8099/get-aws-credentials/")
+    fetch(`${BASE_URL}/get-aws-credentials/`)
       .then((res) => {
-        if (res.ok) return res.json();
+        if (res.ok) router.push("/dashboard");
         return Promise.reject(res);
       })
-      .then((data) => {
-        if (data.access_key_id) {
-          setIsAuthenticated(true);
-          setAccessKeyId(data.access_key_id);
-        } else {
-          setIsAuthenticated(false);
-        }
-      })
+      // .then((data) => {
+      //   if (data.access_key_id) {
+      //     setIsAuthenticated(true);
+      //     setAccessKeyId(data.access_key_id);
+      //   } else {
+      //     setIsAuthenticated(false);
+      //   }
+      // })
       .catch((error) => {
         toast.error(`Auth check error: ${error}`);
         setIsAuthenticated(false);
@@ -34,13 +36,11 @@ export default function LoginForm() {
   const [secretAccessKey, setSecretAccessKey] = useState("");
   const [region, setRegion] = useState("");
 
-  const router = useRouter();
-
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:8099/store-aws-credentials/", {
+      const res = await fetch(`${BASE_URL}/store-aws-credentials/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -51,12 +51,6 @@ export default function LoginForm() {
       });
 
       if (res.ok) {
-        // console.log("Login successful");
-        // router.replace("/");
-        // window.location.reload();
-        sessionStorage.setItem("accessKeyId", accessKeyId);
-        sessionStorage.setItem("secretAccessKey", secretAccessKey);
-        sessionStorage.setItem("region", region);
         router.push("/dashboard");
       } else {
         const data = await res.json();
