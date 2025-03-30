@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 const axios = require("axios").default;
 
 export default function Expander({ tests, depth = 0, initial_display = true }) {
-  const BASE_URL = process.env.BASE_URL;
+  const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
   const [isExpanded, setIsExpanded] = useState(false);
 
   const CustomTooltip = ({ active, payload }) => {
@@ -172,7 +172,7 @@ export default function Expander({ tests, depth = 0, initial_display = true }) {
     const rerun_test = (e) =>
       e.stopPropagation();
       axios
-        .post(`${BASE_URL}/run-bash-script`, {
+        .post(`${NEXT_PUBLIC_BASE_URL}/run-bash-script`, {
           script: tests.script,
         })
         .then((resp) => {

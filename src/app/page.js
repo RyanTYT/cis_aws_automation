@@ -11,44 +11,45 @@ export default function LoginForm() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
-  const BASE_URL = process.env.BASE_URL;
+  const [accessKeyId, setAccessKeyId] = useState("");
+  const [secretAccessKey, setSecretAccessKey] = useState("");
+  const [region, setRegion] = useState("");
+
+  const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
   useEffect(() => {
-    fetch(`${BASE_URL}/get-aws-credentials/`)
+    fetch(`${NEXT_PUBLIC_BASE_URL}/get-aws-credentials/`)
       .then((res) => {
-        if (res.ok) router.push("/dashboard");
-        return Promise.reject(res);
+        if (res.ok) {
+          res.json().then((data) => {
+            setAccessKeyId(data.access_key_id);
+            setSecretAccessKey(data.secret_access_key);
+            setRegion(data.default_region);
+          });
+        }
+        setIsAuthenticated(false);
       })
-      // .then((data) => {
-      //   if (data.access_key_id) {
-      //     setIsAuthenticated(true);
-      //     setAccessKeyId(data.access_key_id);
-      //   } else {
-      //     setIsAuthenticated(false);
-      //   }
-      // })
       .catch((error) => {
         toast.error(`Auth check error: ${error}`);
         setIsAuthenticated(false);
       });
   }, []);
 
-  const [accessKeyId, setAccessKeyId] = useState("");
-  const [secretAccessKey, setSecretAccessKey] = useState("");
-  const [region, setRegion] = useState("");
-
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${BASE_URL}/store-aws-credentials/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          access_key_id: accessKeyId,
-          secret_access_key: secretAccessKey,
-          default_region: region,
-        }),
-      });
+      const res = await fetch(
+        `${NEXT_PUBLIC_BASE_URL}/store-aws-credentials/`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key_id: accessKeyId,
+            secret_access_key: secretAccessKey,
+            default_region: region,
+          }),
+        },
+      );
 
       if (res.ok) {
         router.push("/dashboard");
@@ -85,27 +86,27 @@ export default function LoginForm() {
             <TextField
               id="standard-helperText"
               label="Access Key ID"
-              defaultValue=""
               // helperText="Access Key ID"
               InputLabelProps={{ sx: { color: "var(--foreground)" } }}
               onChange={(e) => setAccessKeyId(e.target.value)}
+              value={accessKeyId}
               variant="standard"
             />
             <TextField
               id="standard-helperText"
               label="Secret Access Key"
-              defaultValue=""
               onChange={(e) => setSecretAccessKey(e.target.value)}
               InputLabelProps={{ sx: { color: "var(--foreground)" } }}
+              value={secretAccessKey}
               type="password"
               variant="standard"
             />
             <TextField
               id="standard-helperText"
               label="Region"
-              defaultValue=""
               onChange={(e) => setRegion(e.target.value)}
               InputLabelProps={{ sx: { color: "var(--foreground)" } }}
+              value={region}
               variant="standard"
             />
             <Button variant="text" type="submit">

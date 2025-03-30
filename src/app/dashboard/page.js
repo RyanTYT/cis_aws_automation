@@ -28,7 +28,7 @@ function build_nested_json(test_dict, key, val) {
 }
 
 export default function Home() {
-  const BASE_URL = process.env.BASE_URL;
+  const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
   const [assets, setAssets] = useState([]);
   const [tests, setTests] = useState(<></>);
   const [num_of_tests, set_num_of_tests] = useState(0);
@@ -47,21 +47,21 @@ export default function Home() {
   }, []);
 
   const run_all_tests = async () => {
-    await axios.get(`${BASE_URL}/get-aws-assets`).then(async (res) => {
+    await axios.get(`${NEXT_PUBLIC_BASE_URL}/get-aws-assets`).then(async (res) => {
       const assets_res = await res.data();
       setAssets(assets_res);
 
       const assets_tests = {};
       assets_res
         .map(async (asset) => {
-          await axios.get(`${BASE_URL}/get-relevant-doc/${asset}`);
+          await axios.get(`${NEXT_PUBLIC_BASE_URL}/get-relevant-doc/${asset}`);
           return asset;
         })
         .map(async (asset) => {
-          await axios.get(`${BASE_URL}/generate-bash-scripts/${asset}`);
+          await axios.get(`${NEXT_PUBLIC_BASE_URL}/generate-bash-scripts/${asset}`);
         });
 
-      const test_results = (await axios.get(`${BASE_URL}/final-data/`)).json();
+      const test_results = (await axios.get(`${NEXT_PUBLIC_BASE_URL}/final-data/`)).json();
       set_num_of_tests(
         Object.keys(test_results)
           .map((key) => Object.keys(test_results[key]).length)
@@ -85,7 +85,7 @@ export default function Home() {
 
   const [access_key_id, set_access_key_id] = useState(0);
   // axios
-  //   .get(`${BASE_URL}/get_aws_credentials`)
+  //   .get(`${NEXT_PUBLIC_BASE_URL}/get_aws_credentials`)
   //   .then((res) => set_access_key_id(res.data().access_key_id));
 
   return (
