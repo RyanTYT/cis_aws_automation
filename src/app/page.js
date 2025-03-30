@@ -88,6 +88,11 @@ export default function LoginForm() {
               label="Access Key ID"
               // helperText="Access Key ID"
               InputLabelProps={{ sx: { color: "var(--foreground)" } }}
+              sx={{
+                input: {
+                  color: "var(--foreground)",
+                },
+              }}
               onChange={(e) => setAccessKeyId(e.target.value)}
               value={accessKeyId}
               variant="standard"
@@ -97,6 +102,11 @@ export default function LoginForm() {
               label="Secret Access Key"
               onChange={(e) => setSecretAccessKey(e.target.value)}
               InputLabelProps={{ sx: { color: "var(--foreground)" } }}
+              sx={{
+                input: {
+                  color: "var(--foreground)",
+                },
+              }}
               value={secretAccessKey}
               type="password"
               variant="standard"
@@ -106,6 +116,11 @@ export default function LoginForm() {
               label="Region"
               onChange={(e) => setRegion(e.target.value)}
               InputLabelProps={{ sx: { color: "var(--foreground)" } }}
+              sx={{
+                input: {
+                  color: "var(--foreground)",
+                },
+              }}
               value={region}
               variant="standard"
             />
