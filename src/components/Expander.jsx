@@ -168,7 +168,8 @@ export default function Expander({ tests, depth = 0, initial_display = true }) {
       .replaceAll("_", " ")
       .replace(/\.md$/, "");
 
-    const rerun_test = () =>
+    const rerun_test = (e) =>
+      e.stopPropagation();
       axios
         .post("", {
           script: tests.script,

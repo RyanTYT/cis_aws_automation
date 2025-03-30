@@ -116,9 +116,16 @@ export default function Home() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ color: "#E0E6F0" }}>Benchmark Test</TableCell>
+                <TableCell sx={{ color: "#E0E6F0", fontSize: "1.5rem" }}>
+                  Benchmark Test
+                </TableCell>
                 <TableCell
-                  sx={{ color: "#E0E6F0", width: "20rem", textAlign: "center" }}
+                  sx={{
+                    color: "#E0E6F0",
+                    width: "20rem",
+                    textAlign: "center",
+                    fontSize: "1.5rem",
+                  }}
                 >
                   Status
                 </TableCell>
