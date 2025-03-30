@@ -3,7 +3,11 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import Expander from "@/components/Expander";
 import CustomSidebar from "@/components/CustomSidebar";
-import { Button } from "@mui/material";
+import { Button, TableBody, TableCell, TableRow } from "@mui/material";
+import Table from "@mui/material/Table";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import Paper from "@mui/material/Paper";
 const axios = require("axios").default;
 import jsonData from "./output.json" assert { type: "json" };
 
@@ -26,21 +30,14 @@ function build_nested_json(test_dict, key, val) {
 export default function Home() {
   const BASE_URL = process.env.BASE_URL;
   const [assets, setAssets] = useState([]);
-  // const [logs, setLogsRaw] = useState([]);
   const [tests, setTests] = useState(<></>);
-  // const setLogs = (logs) => {
-  //   // setLogsRaw(logs);
-  //   setTests(
-  //     Object.keys(logs).map((key) => (
-  //       <Expander key={key} tests={logs[key]} depth={0} />
-  //     )),
-  //   );
-  // };
-  // const setTests = (tests) => {
-  //   setTestsRaw();
-  // };
-  //
+  const [num_of_tests, set_num_of_tests] = useState(0);
   useEffect(() => {
+    set_num_of_tests(
+      Object.keys(jsonData)
+        .map((key) => Object.keys(jsonData[key]).length)
+        .reduce((first_sum, second_sum) => first_sum + second_sum),
+    );
     setTests(
       Object.keys(jsonData).map((key) => {
         jsonData[key].title = key;
@@ -65,6 +62,11 @@ export default function Home() {
         });
 
       const test_results = (await axios.get(`${BASE_URL}/final-data/`)).json();
+      set_num_of_tests(
+        Object.keys(test_results)
+          .map((key) => Object.keys(test_results[key]).length)
+          .reduce((first_sum, second_sum) => first_sum + second_sum),
+      );
       setTests(
         Object.keys(test_results).map((key) => {
           test_results[key].title = key;
@@ -80,8 +82,6 @@ export default function Home() {
     //   setLogs(log_dict);
     // });
   };
-
-  const num_of_tests = 100;
 
   const [access_key_id, set_access_key_id] = useState(0);
   // axios
@@ -106,16 +106,28 @@ export default function Home() {
           </header>
         </div>
 
-        <table className={styles.projects_table}>
-          <thead>
-            <tr>
-              <th>Benchmark Test</th>
-              <th>Status</th>
-              <th className="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>{tests}</tbody>
-        </table>
+        <TableContainer
+          component={Paper}
+          sx={{
+            background: "#3A475E",
+            color: "#E0E6F0",
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ color: "#E0E6F0" }}>Benchmark Test</TableCell>
+                <TableCell
+                  sx={{ color: "#E0E6F0", width: "20rem", textAlign: "center" }}
+                >
+                  Status
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>{tests}</TableBody>
+          </Table>
+        </TableContainer>
       </div>
     </div>
   );
