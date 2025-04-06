@@ -169,7 +169,7 @@ export default function Expander({ tests, depth = 0, initial_display = true }) {
       .replaceAll("_", " ")
       .replace(/\.md$/, "");
 
-    const rerun_test = (e) =>
+    const rerun_test = (e) => {
       e.stopPropagation();
       axios
         .post(`${NEXT_PUBLIC_BASE_URL}/run-bash-script`, {
@@ -178,9 +178,10 @@ export default function Expander({ tests, depth = 0, initial_display = true }) {
         .then((resp) => {
           tests.result = resp.data;
         })
-        .catch(() => {
-          toast.error("Failed to re-run test");
+        .catch((e) => {
+          toast.error(`Failed to re-run test:\n${e}`);
         });
+    };
 
     return (
       <TableBody>
@@ -195,7 +196,7 @@ export default function Expander({ tests, depth = 0, initial_display = true }) {
         >
           <TableCell
             sx={{
-              pl: `${depth * 4}px`,
+              pl: `${depth * 2.5}rem`,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -226,14 +227,16 @@ export default function Expander({ tests, depth = 0, initial_display = true }) {
                 display: "inline-block",
                 borderRadius: "100%",
                 bgcolor:
-                  tests.result.status === "success" ? "#4AD673" : "#D65B4A",
+                  tests.result.status === "success"
+                    ? "#4AD673"
+                    : tests.result.status === "fail"
+                      ? "#D65B4A"
+                      : "#B0B0B0",
                 width: "1rem",
                 height: "1rem",
               }}
             />
-            {tests.result.status === "success" ? (
-              <></>
-            ) : (
+            {tests.result.status === "fail" ? (
               <Box marginTop={1}>
                 <Button
                   variant="outlined"
@@ -246,6 +249,8 @@ export default function Expander({ tests, depth = 0, initial_display = true }) {
                   Re-run
                 </Button>
               </Box>
+            ) : (
+              <></>
             )}
           </TableCell>
         </TableRow>

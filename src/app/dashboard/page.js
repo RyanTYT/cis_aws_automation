@@ -10,6 +10,7 @@ import TableHead from "@mui/material/TableHead";
 import Paper from "@mui/material/Paper";
 const axios = require("axios").default;
 import jsonData from "./output.json" assert { type: "json" };
+import { toast } from "react-toastify";
 
 // ensure key is reversed
 function build_nested_json(test_dict, key, val) {
@@ -88,7 +89,8 @@ export default function Home() {
             return <Expander key={key} tests={test_results[key]} depth={0} />;
           }),
         );
-      });
+      })
+      .catch((e) => toast.error(`Failed to run tests:\n${e}`));
     // fetch("/api").then(async (res) => {
     //   const log_dict = {};
     //   (await res.json()).forEach((log) =>

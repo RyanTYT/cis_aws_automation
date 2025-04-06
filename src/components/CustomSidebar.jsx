@@ -42,15 +42,15 @@ export default function CustomSidebar({ accessKeyId }) {
       });
 
       if (res.ok) {
-        sessionStorage.setItem("accessKeyId", null);
-        sessionStorage.setItem("secretAccessKey", null);
-        sessionStorage.setItem("region", null);
+        // sessionStorage.setItem("accessKeyId", null);
+        // sessionStorage.setItem("secretAccessKey", null);
+        // sessionStorage.setItem("region", null);
         router.push("/");
       } else {
         toast.error("Logout failed");
       }
     } catch (err) {
-      toast.error("Logout error:", err);
+      toast.error(`Logout error: ${err}`);
     }
   };
 

@@ -124,7 +124,11 @@ export default function LoginForm() {
               value={region}
               variant="standard"
             />
-            <Button variant="text" type="submit">
+            <Button
+              variant="text"
+              type="submit"
+              sx={{ color: "var(--foreground)" }}
+            >
               Login
             </Button>
           </form>
