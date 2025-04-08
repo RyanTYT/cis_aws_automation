@@ -55,7 +55,7 @@ export default function CustomSidebar({ accessKeyId }) {
   };
 
 
-  const handleGenerateReport = async () => {
+  const handleGeneratePDF = async () => {
     try {
       const res = await fetch(
         `${BASE_URL}/generate-report/${accessKeyId}/${secretAccessKey}/${region}`
@@ -73,6 +73,52 @@ export default function CustomSidebar({ accessKeyId }) {
       toast.error(err.message || "Error generating report");
     }
   };
+
+  const handleGenerateMarkdown = async () => {
+    try {
+      const res = await fetch(
+        `${BASE_URL}/get-stored-data/${accessKeyId}/${secretAccessKey}/${region}`
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch stored data");
+
+      const data = await res.json();
+
+      let md = `# AWS CIS Compliance Report\n\n`;
+      md += `**Access Key ID:** \`${accessKeyId}\`\n`;
+      md += `**Region:** \`${region}\`\n`;
+      md += `**Generated:** ${new Date().toLocaleString()}\n\n`;
+
+      Object.entries(data).forEach(([category, benchmarks]) => {
+        md += `## ${category.toUpperCase()}\n\n`;
+
+        Object.entries(benchmarks).forEach(([benchmarkId, benchmark]) => {
+          const result = benchmark.result || {};
+          const title = result.name || benchmark.title || benchmarkId;
+          const status = result.status?.toUpperCase() || "UNKNOWN";
+          const output = result.output || "";
+          const error = result.error || "";
+
+          md += `### ${title}\n`;
+          md += `- **Status:** \`${status}\`\n`;
+          if (error) md += `- **Error:** \`${error}\`\n`;
+          md += `- **Output:**\n\n\`\`\`\n${output}\n\`\`\`\n\n`;
+        });
+      });
+
+      const blob = new Blob([md], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "aws_cis_report.md";
+      a.click();
+
+      toast.success("Markdown report downloaded!");
+    } catch (err) {
+      toast.error(err.message || "Error generating markdown report");
+    }
+  };
+    
 
   return (
     <Sidebar backgroundColor="#273142">
@@ -102,7 +148,10 @@ export default function CustomSidebar({ accessKeyId }) {
             // <MenuItem> Remedies </MenuItem>
           }
         </SubMenu>
-        <MenuItem onClick={handleGenerateReport}> Generate Report </MenuItem>
+        <SubMenu label="Generate Report">
+          <MenuItem onClick={handleGeneratePDF}> Export PDF </MenuItem>
+          <MenuItem onClick={handleGenerateMarkdown}> Export Markdown </MenuItem>
+        </SubMenu>
         <MenuItem onClick={handleLogout}> Logout </MenuItem>
       </Menu>
     </Sidebar>
