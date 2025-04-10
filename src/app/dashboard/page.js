@@ -106,7 +106,7 @@ export default function Home() {
 
   return (
     <div className={styles.full_page}>
-      <CustomSidebar accessKeyId={access_key_id} />
+      <CustomSidebar accessKeyId={access_key_id} dashboard={true} />
       <div className={styles.table_container}>
         <div className={styles.table_header}>
           <header>
@@ -116,8 +116,8 @@ export default function Home() {
             </div>
           </header>
           <header>
-            <Button variant="outlined" onClick={run_all_tests}>
-              Run
+            <Button variant="outlined" onClick={run_all_tests} sx={{color: "#E0E6F0", borderColor: "#E0E6F0"}}>
+              RUN
             </Button>
           </header>
         </div>

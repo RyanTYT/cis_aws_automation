@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 
-export default function CustomSidebar({ accessKeyId }) {
+export default function CustomSidebar({ accessKeyId, dashboard }) {
   const router = useRouter();
 
   const [secretAccessKey, setSecretAccessKey] = useState("");
@@ -54,11 +54,10 @@ export default function CustomSidebar({ accessKeyId }) {
     }
   };
 
-
   const handleGeneratePDF = async () => {
     try {
       const res = await fetch(
-        `${BASE_URL}/generate-report/${accessKeyId}/${secretAccessKey}/${region}`
+        `${BASE_URL}/generate-report/${accessKeyId}/${secretAccessKey}/${region}`,
       );
       if (!res.ok) throw new Error("Failed to generate report");
 
@@ -77,7 +76,7 @@ export default function CustomSidebar({ accessKeyId }) {
   const handleGenerateMarkdown = async () => {
     try {
       const res = await fetch(
-        `${BASE_URL}/get-stored-data/${accessKeyId}/${secretAccessKey}/${region}`
+        `${BASE_URL}/get-stored-data/${accessKeyId}/${secretAccessKey}/${region}`,
       );
 
       if (!res.ok) throw new Error("Failed to fetch stored data");
@@ -118,7 +117,6 @@ export default function CustomSidebar({ accessKeyId }) {
       toast.error(err.message || "Error generating markdown report");
     }
   };
-    
 
   return (
     <Sidebar backgroundColor="#273142">
@@ -130,27 +128,39 @@ export default function CustomSidebar({ accessKeyId }) {
                 color: "#273142",
                 backgroundColor: "var(--foreground)",
               },
-              color: active ? "#273142" : "var(--foreground)",
-              backgroundColor: active ? "var(--foreground)" : "#273142",
+              color: active ? "var(--foreground)" : "var(--foreground)",
+              backgroundColor: active ? "#3A475E" : "#273142",
             };
           },
         }}
       >
-        <SubMenu label="Profiles">
-          <MenuItem>
-            {" "}
-            Tests Dashboard: <br />
-            <p style={{ fontSize: "0.8rem", fontWeight: "700" }}>
-              Access Key ID: {accessKeyId}{" "}
-            </p>
-          </MenuItem>
-          {
-            // <MenuItem> Remedies </MenuItem>
-          }
-        </SubMenu>
+        <MenuItem active={dashboard} onClick={() => router.push("/dashboard")}>
+          Tests Dashboard: <br />
+          <p style={{ fontSize: "0.8rem", fontWeight: "700" }}>
+            Access Key ID: {accessKeyId}{" "}
+          </p>
+        </MenuItem>
+        <MenuItem active={!dashboard} onClick={() => router.push("/aws-assets")}>AWS Assets</MenuItem>
+        {
+          // <SubMenu label="Profiles">
+          //   <MenuItem active={true}>
+          //     {" "}
+          //     Tests Dashboard: <br />
+          //     <p style={{ fontSize: "0.8rem", fontWeight: "700" }}>
+          //       Access Key ID: {accessKeyId}{" "}
+          //     </p>
+          //   </MenuItem>
+          //   {
+          //     // <MenuItem> Remedies </MenuItem>
+          //   }
+          // </SubMenu>
+        }
         <SubMenu label="Generate Report">
           <MenuItem onClick={handleGeneratePDF}> Export PDF </MenuItem>
-          <MenuItem onClick={handleGenerateMarkdown}> Export Markdown </MenuItem>
+          <MenuItem onClick={handleGenerateMarkdown}>
+            {" "}
+            Export Markdown{" "}
+          </MenuItem>
         </SubMenu>
         <MenuItem onClick={handleLogout}> Logout </MenuItem>
       </Menu>

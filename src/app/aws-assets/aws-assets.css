@@ -1,5 +1,6 @@
 .aws-assets-container {
     max-width: 800px;
+    min-width: 600px;
     margin: auto;
     padding: 20px;
     background: #1e2a3a;
