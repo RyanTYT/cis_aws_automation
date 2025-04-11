@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import Expander from "@/components/Expander";
 import CustomSidebar from "@/components/CustomSidebar";
-import { Button, TableBody, TableCell, TableRow } from "@mui/material";
+import {
+  Button,
+  TableBody,
+  TableCell,
+  TableRow,
+  CircularProgress,
+} from "@mui/material";
 import Table from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
@@ -34,75 +40,114 @@ export default function Home() {
   const [assets, setAssets] = useState([]);
   const [tests, setTests] = useState(<></>);
   const [num_of_tests, set_num_of_tests] = useState(0);
+
+  // Loading state trackers
+  const [isLoadingAssets, setIsLoadingAssets] = useState(false);
+  const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+  const [isGeneratingScripts, setIsGeneratingScripts] = useState(false);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
+
   useEffect(() => {
-    set_num_of_tests(
-      Object.keys(jsonData)
-        .map(
-          (key) =>
-            Object.keys(jsonData[key]).filter((key) => key !== "title").length,
-        )
-        .reduce((first_sum, second_sum) => first_sum + second_sum),
-    );
-    setTests(
-      Object.keys(jsonData).map((key) => {
-        jsonData[key].title = key;
-        return <Expander key={key} tests={jsonData[key]} depth={0} />;
-      }),
-    );
+    // set_num_of_tests(
+    //   Object.keys(jsonData)
+    //     .map(
+    //       (key) =>
+    //         Object.keys(jsonData[key]).filter((key) => key !== "title").length,
+    //     )
+    //     .reduce((first_sum, second_sum) => first_sum + second_sum),
+    // );
+    // setTests(
+    //   Object.keys(jsonData).map((key) => {
+    //     jsonData[key].title = key;
+    //     return <Expander key={key} tests={jsonData[key]} depth={0} />;
+    //   }),
+    // );
     axios.get(`${NEXT_PUBLIC_BASE_URL}/get-aws-credentials`).then((res) => {
       set_access_key_id(res.data.access_key_id);
     });
   }, []);
 
   const run_all_tests = async () => {
-    await axios
-      .get(`${NEXT_PUBLIC_BASE_URL}/get-aws-assets`)
-      .then(async (res) => {
-        const assets_res = await res.data();
-        setAssets(assets_res);
+    try {
+      // Start loading assets
+      setIsLoadingAssets(true);
+      const assetsResponse = await axios.get(
+        `${NEXT_PUBLIC_BASE_URL}/get-aws-assets`,
+      );
+      const assets_res = assetsResponse.data;
+      setAssets(assets_res);
+      setIsLoadingAssets(false);
 
-        const assets_tests = {};
-        assets_res
-          .map(async (asset) => {
-            await axios.get(
-              `${NEXT_PUBLIC_BASE_URL}/get-relevant-doc/${asset}`,
-            );
-            return asset;
-          })
-          .map(async (asset) => {
-            await axios.get(
-              `${NEXT_PUBLIC_BASE_URL}/generate-bash-scripts/${asset}`,
-            );
-          });
+      const asset_maps = {
+        "IAM Users": "AWS Identity and Access Management (IAM)",
+        "IAM Roles": "AWS Identity and Access Management (IAM)",
+        "IAM Access Analyzers": "IAM Access Analyzer",
+        "AWS Config Rules": "AWS Config",
+        "CloudTrail Trails": "AWS CloudTrail",
+        "CloudWatch Alarms": "AWS CloudWatch",
+        "SNS Topics": "AWS Simple Notification Service (SNS)",
+        "S3 Buckets": "AWS Simple Storage Service (S3)",
+        "EC2 Instances": "Elastic Compute Cloud (EC2)",
+        "RDS Instances": "Relational Database Service (RDS)",
+        VPCs: "AWS VPC",
+      };
 
-        const test_results = (
-          await axios.get(`${NEXT_PUBLIC_BASE_URL}/final-data/`)
-        ).json();
-        set_num_of_tests(
-          Object.keys(test_results)
-            .map((key) => Object.keys(test_results[key]).length)
-            .reduce((first_sum, second_sum) => first_sum + second_sum),
+      // Start loading docs
+      setIsLoadingDocs(true);
+      const relevantAssets = Object.keys(assets_res)
+        .filter((asset) => asset === "IAM Users")
+        .map((asset) => asset_maps[asset]);
+
+      // Fetch docs sequentially with loading state
+      for (const asset of relevantAssets) {
+        await axios.get(`${NEXT_PUBLIC_BASE_URL}/get-relevant-doc/${asset}`);
+      }
+      setIsLoadingDocs(false);
+
+      // Start generating scripts
+      setIsGeneratingScripts(true);
+      for (const asset of relevantAssets) {
+        await axios.get(
+          `${NEXT_PUBLIC_BASE_URL}/generate-bash-scripts/${asset}`,
+          {
+            timeout: 360000, // 6 minutes
+          },
         );
-        setTests(
-          Object.keys(test_results).map((key) => {
-            test_results[key].title = key;
-            return <Expander key={key} tests={test_results[key]} depth={0} />;
-          }),
-        );
-      })
-      .catch((e) => toast.error(`Failed to run tests:\n${e}`));
-    // fetch("/api").then(async (res) => {
-    //   const log_dict = {};
-    //   (await res.json()).forEach((log) =>
-    //     build_nested_json(log_dict, log.id.split(".").reverse(), log),
-    //   );
-    //   setLogs(log_dict);
-    // });
+      }
+      setIsGeneratingScripts(false);
+
+      // Load final results
+      setIsLoadingResults(true);
+      const testResultsResponse = await axios.get(
+        `${NEXT_PUBLIC_BASE_URL}/final-data/`,
+        {
+          timeout: 360000, // 6 minutes
+        },
+      );
+      const test_results = testResultsResponse.data;
+      setIsLoadingResults(false);
+
+      // Update UI with results
+      set_num_of_tests(
+        Object.keys(test_results)
+          .map((key) => Object.keys(test_results[key]).length)
+          .reduce((first_sum, second_sum) => first_sum + second_sum),
+      );
+      setTests(
+        Object.keys(test_results).map((key) => {
+          test_results[key].title = key;
+          return <Expander key={key} tests={test_results[key]} depth={0} />;
+        }),
+      );
+    } catch (e) {
+      // Reset all loading states on error
+      setIsLoadingAssets(false);
+      setIsLoadingDocs(false);
+      setIsGeneratingScripts(false);
+      setIsLoadingResults(false);
+      toast.error(`Failed to run tests:\n${e}`);
+    }
   };
-
-  // axios
-  //   .get(`${NEXT_PUBLIC_BASE_URL}/get_aws_credentials`)
-  //   .then((res) => set_access_key_id(res.data().access_key_id));
 
   return (
     <div className={styles.full_page}>
@@ -116,8 +161,47 @@ export default function Home() {
             </div>
           </header>
           <header>
-            <Button variant="outlined" onClick={run_all_tests} sx={{color: "#E0E6F0", borderColor: "#E0E6F0"}}>
-              RUN
+            <Button
+              variant="outlined"
+              onClick={run_all_tests}
+              disabled={
+                isLoadingAssets ||
+                isLoadingDocs ||
+                isGeneratingScripts ||
+                isLoadingResults
+              }
+              sx={{
+                color: "#E0E6F0",
+                borderColor: "#E0E6F0",
+                "&.Mui-disabled": {
+                  color: "rgba(224, 230, 240, 0.5)",
+                  borderColor: "rgba(224, 230, 240, 0.5)",
+                },
+              }}
+            >
+              {isLoadingAssets ||
+              isLoadingDocs ||
+              isGeneratingScripts ||
+              isLoadingResults ? (
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <CircularProgress size={20} sx={{ color: "#E0E6F0" }} />
+                  {isLoadingAssets && "Getting assets..."}
+                  {!isLoadingAssets && isLoadingDocs && "Loading docs..."}
+                  {!isLoadingAssets &&
+                    !isLoadingDocs &&
+                    isGeneratingScripts &&
+                    "Generating scripts..."}
+                  {!isLoadingAssets &&
+                    !isLoadingDocs &&
+                    !isGeneratingScripts &&
+                    isLoadingResults &&
+                    "Processing results..."}
+                </div>
+              ) : (
+                "RUN"
+              )}
             </Button>
           </header>
         </div>
@@ -148,7 +232,22 @@ export default function Home() {
               </TableRow>
             </TableHead>
 
-            <TableBody>{tests}</TableBody>
+            <TableBody>
+              {isLoadingResults ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={2}
+                    align="center"
+                    sx={{ color: "#E0E6F0" }}
+                  >
+                    <CircularProgress sx={{ color: "#E0E6F0", my: 3 }} />
+                    <div>Processing test results...</div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tests
+              )}
+            </TableBody>
           </Table>
         </TableContainer>
       </div>
