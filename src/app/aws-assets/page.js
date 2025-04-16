@@ -5,41 +5,42 @@ import "./aws-assets.css";
 
 export default function AWSAssetsPage() {
   const [assets, setAssets] = useState({
-    "AWS Config Rules": [],
-    "CloudTrail Trails": [],
-    "CloudWatch Alarms": [],
-    "EC2 Instances": [],
-    "IAM Access Analyzers": [],
-    "IAM Roles": [
-      "AWSServiceRoleForAPIGateway",
-      "AWSServiceRoleForOrganizations",
-      "AWSServiceRoleForRDS",
-      "AWSServiceRoleForSSO",
-      "AWSServiceRoleForSupport",
-      "AWSServiceRoleForTrustedAdvisor",
-      "rds-monitoring-role",
-    ],
-    "IAM Users": ["admin-user", "cli-user", "test-user"],
-    "RDS Instances": ["database-1"],
-    "S3 Buckets": ["testbucketsiol"],
-    "SNS Topics": [],
-    VPCs: ["vpc-0f8144ea4375c89ad"],
+    "": [],
+    // "AWS Config Rules": [],
+    // "CloudTrail Trails": [],
+    // "CloudWatch Alarms": [],
+    // "EC2 Instances": [],
+    // "IAM Access Analyzers": [],
+    // "IAM Roles": [
+    //   "AWSServiceRoleForAPIGateway",
+    //   "AWSServiceRoleForOrganizations",
+    //   "AWSServiceRoleForRDS",
+    //   "AWSServiceRoleForSSO",
+    //   "AWSServiceRoleForSupport",
+    //   "AWSServiceRoleForTrustedAdvisor",
+    //   "rds-monitoring-role",
+    // ],
+    // "IAM Users": ["admin-user", "cli-user", "test-user"],
+    // "RDS Instances": ["database-1"],
+    // "S3 Buckets": ["testbucketsiol"],
+    // "SNS Topics": [],
+    // VPCs: ["vpc-0f8144ea4375c89ad"],
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect(() => {
-  //   fetch("http://localhost:8099/get-aws-assets/")
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       if (data.detail) {
-  //         throw new Error(data.detail);
-  //       }
-  //       setAssets(data);
-  //     })
-  //     .catch((err) => setError(err.message))
-  //     .finally(() => setLoading(false));
-  // }, []);
+  useEffect(() => {
+    fetch("http://localhost:8099/get-aws-assets/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.detail) {
+          throw new Error(data.detail);
+        }
+        setAssets(data);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div style={{ width: "100%", display: "flex", flexDirection: "row" }}>
@@ -50,9 +51,9 @@ export default function AWSAssetsPage() {
         {loading && <p className="loading-message">Loading AWS assets...</p>}
         {error && <p className="error-message">Error: {error}</p>}
 
-        {assets && (
-          <div className="assets-list">
-            {Object.entries(assets).map(([category, items]) => (
+        <div className="assets-list" style={{ height: "100vh" }}>
+          {assets &&
+            Object.entries(assets).map(([category, items]) => (
               <div key={category} className="asset-category">
                 <h2 className="category-title">{category}</h2>
                 <ul>
@@ -64,8 +65,7 @@ export default function AWSAssetsPage() {
                 </ul>
               </div>
             ))}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

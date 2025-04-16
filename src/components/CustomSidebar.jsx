@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
+import axios from "axios";
 
-export default function CustomSidebar({ accessKeyId, dashboard }) {
+export default function CustomSidebar({ dashboard }) {
   const router = useRouter();
 
+  const [accessKeyId, setAccessKeyId] = useState("");
   const [secretAccessKey, setSecretAccessKey] = useState("");
   const [region, setRegion] = useState("");
 
@@ -18,6 +20,7 @@ export default function CustomSidebar({ accessKeyId, dashboard }) {
         const res = await fetch(`${BASE_URL}/get-aws-credentials/`);
         if (res.ok) {
           const data = await res.json();
+          setAccessKeyId(data.access_key_id);
           setSecretAccessKey(data.secret_access_key);
           setRegion(data.default_region);
         }
@@ -56,9 +59,8 @@ export default function CustomSidebar({ accessKeyId, dashboard }) {
 
   const handleGeneratePDF = async () => {
     try {
-      const res = await fetch(
-        `${BASE_URL}/generate-report/${accessKeyId}/${secretAccessKey}/${region}`,
-      );
+      await axios.post(`${BASE_URL}/store-data`);
+      const res = await fetch(`${BASE_URL}/generate-report/`);
       if (!res.ok) throw new Error("Failed to generate report");
 
       const blob = await res.blob();
@@ -75,9 +77,8 @@ export default function CustomSidebar({ accessKeyId, dashboard }) {
 
   const handleGenerateMarkdown = async () => {
     try {
-      const res = await fetch(
-        `${BASE_URL}/get-stored-data/${accessKeyId}/${secretAccessKey}/${region}`,
-      );
+      await axios.post(`${BASE_URL}/store-data`);
+      const res = await fetch(`${BASE_URL}/get-stored-data/`);
 
       if (!res.ok) throw new Error("Failed to fetch stored data");
 
@@ -140,7 +141,12 @@ export default function CustomSidebar({ accessKeyId, dashboard }) {
             Access Key ID: {accessKeyId}{" "}
           </p>
         </MenuItem>
-        <MenuItem active={!dashboard} onClick={() => router.push("/aws-assets")}>AWS Assets</MenuItem>
+        <MenuItem
+          active={!dashboard}
+          onClick={() => router.push("/aws-assets")}
+        >
+          AWS Assets
+        </MenuItem>
         {
           // <SubMenu label="Profiles">
           //   <MenuItem active={true}>

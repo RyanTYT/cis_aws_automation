@@ -15,7 +15,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import Paper from "@mui/material/Paper";
 const axios = require("axios").default;
-import jsonData from "./output.json" assert { type: "json" };
 import { toast } from "react-toastify";
 
 // ensure key is reversed
@@ -65,6 +64,7 @@ export default function Home() {
     axios.get(`${NEXT_PUBLIC_BASE_URL}/get-aws-credentials`).then((res) => {
       set_access_key_id(res.data.access_key_id);
     });
+    window.test_data = "ok";
   }, []);
 
   const run_all_tests = async () => {
@@ -89,13 +89,25 @@ export default function Home() {
         "S3 Buckets": "AWS Simple Storage Service (S3)",
         "EC2 Instances": "Elastic Compute Cloud (EC2)",
         "RDS Instances": "Relational Database Service (RDS)",
-        VPCs: "AWS VPC",
+        "VPCs": "AWS VPC",
       };
 
       // Start loading docs
       setIsLoadingDocs(true);
       const relevantAssets = Object.keys(assets_res)
-        .filter((asset) => asset === "IAM Users")
+        .filter((asset) =>
+          ![
+            "IAM Roles",
+            "IAM Access Analyzers",
+            "AWS Config Rules",
+            "CloudTrail Trails",
+            "CloudWatch Alarms",
+            "SNS Topics",
+            "EC2 Instances",
+            "RDS Instances",
+          ].includes(asset),
+        )
+        .filter((asset) => assets_res[asset].length > 0)
         .map((asset) => asset_maps[asset]);
 
       // Fetch docs sequentially with loading state
@@ -110,7 +122,7 @@ export default function Home() {
         await axios.get(
           `${NEXT_PUBLIC_BASE_URL}/generate-bash-scripts/${asset}`,
           {
-            timeout: 360000, // 6 minutes
+            timeout: 900000, // 15 minutes
           },
         );
       }
@@ -121,11 +133,13 @@ export default function Home() {
       const testResultsResponse = await axios.get(
         `${NEXT_PUBLIC_BASE_URL}/final-data/`,
         {
-          timeout: 360000, // 6 minutes
+          timeout: 1800000, // 15 minutes
         },
       );
       const test_results = testResultsResponse.data;
       setIsLoadingResults(false);
+
+      window.test_data = test_results;
 
       // Update UI with results
       set_num_of_tests(
