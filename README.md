@@ -1,38 +1,39 @@
 # cis_aws_automation
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Prerequisites
 
-## Getting Started
+1. Docker
+2. Backend server
 
-First, run the development server:
+## Starting the Frontend Server using Docker
 
+1. Navigate to the root directory and run the following:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker build -t capstone-frontend .
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the Docker container
+```bash
+docker run -p 3000:3000 capstone-frontend
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Layout
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Landing Page (Login Page)
 
-## Learn More
+Enter the (access key id, secret access key and region) to be stored on the backend server for the session.
 
-To learn more about Next.js, take a look at the following resources:
+2. Dashboard
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Table detailing the results of the automated tests run. Table is empty initially and is populated on 'RUN' button pressed on top right. The 'RUN' button does the following:
+- Retrieves the most relevant documents for the associated asset types detected
+- Sends these tests to OpenAI or Anthropic for generation of bash scripts if possible
+- Runs these tests in the subprocess and sends the output to the frontend
+- Pie Chart shows the tests passed, failed and skipped
+- Collapsible table shows hierarchical structure of tests passed for readability
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. AWS Assets
 
-## Deploy on Vercel
+Table that dynamically shows the AWS assets detected using the AWS Key ID, Secret Access Key and Region provided.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Download the results in a readable PDF / MD format
